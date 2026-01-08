@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Drug Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+    }
+    video {
+      width: 100%;
+      border: 1px solid #ccc;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>📦 Drug Scan Record</h2>
+
+<video id="video"></video>
+
+<input id="code" placeholder="Scanned Code" readonly>
+<input id="drugName" placeholder="Drug Name">
+
+<button onclick="saveRecord()">Save Record</button>
+<button onclick="exportCSV()">Export CSV</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Code</th>
+      <th>Drug Name</th>
+    </tr>
+  </thead>
+  <tbody id="records"></tbody>
+</table>
+
+<script>
+  const codeReader = new ZXing.BrowserMultiFormatReader();
+  const video = document.getElementById('video');
+  const codeInput = document.getElementById('code');
+  const recordsTable = document.getElementById('records');
+  let records = [];
+
+  // Start camera
+  codeReader.decodeFromVideoDevice(null, video, (result, err) => {
+    if (result) {
+      codeInput.value = result.text;
+    }
+  });
+
+  function saveRecord() {
+    if (!codeInput.value || !drugName.value) {
+      alert("Please scan code and enter drug name.");
+      return;
+    }
+
+    const record = {
+      time: new Date().toLocaleString(),
+      code: codeInput.value,
+      name: drugName.value
+    };
+
+    records.push(record);
+
+    const row = recordsTable.insertRow();
+    row.insertCell(0).innerText = record.time;
+    row.insertCell(1).innerText = record.code;
+    row.insertCell(2).innerText = record.name;
+
+    drugName.value = "";
+  }
+
+  function exportCSV() {
+    let csv = "Time,Code,Drug Name\n";
+    records.forEach(r => {
+      csv += `${r.time},${r.code},${r.name}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "drug_records.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+
+</body>
+</html>
