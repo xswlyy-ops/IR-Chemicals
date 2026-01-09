@@ -2,115 +2,97 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Drug Scanner</title>
+  <title>Lab Chemical Scan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <!-- HTML5 QR code library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 15px;
     }
-    video {
-      width: 100%;
-      border: 1px solid #ccc;
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
     }
     input, button {
       width: 100%;
-      padding: 10px;
-      margin-top: 8px;
+      padding: 8px;
+      margin-top: 5px;
       font-size: 16px;
     }
-    table {
-      width: 100%;
-      margin-top: 15px;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: center;
+    #records {
+      margin-top: 20px;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
     }
   </style>
 </head>
 
 <body>
 
-<h2>📦 Drug Scan Record</h2>
+<h2>Laboratory Chemical Registration</h2>
 
-<video id="video"></video>
+<!-- Camera scan area -->
+<div id="reader" style="width:100%;"></div>
 
-<input id="code" placeholder="Scanned Code" readonly>
-<input id="drugName" placeholder="Drug Name">
+<label>Scanned / Editable ID Number</label>
+<input type="text" id="chemicalId" placeholder="Scan or edit manually">
+
+<label>Chemical Name</label>
+<input type="text" id="chemicalName" placeholder="e.g. LiTFSI">
+
+<label>Storage Location</label>
+<input type="text" id="location" placeholder="e.g. Cabinet A3 / Fridge 2">
 
 <button onclick="saveRecord()">Save Record</button>
-<button onclick="exportCSV()">Export CSV</button>
 
-<table>
-  <thead>
-    <tr>
-      <th>Time</th>
-      <th>Code</th>
-      <th>Drug Name</th>
-    </tr>
-  </thead>
-  <tbody id="records"></tbody>
-</table>
+<div id="records">
+  <h3>Saved Records</h3>
+  <ul id="recordList"></ul>
+</div>
 
 <script>
-  const codeReader = new ZXing.BrowserMultiFormatReader();
-  const video = document.getElementById('video');
-  const codeInput = document.getElementById('code');
-  const recordsTable = document.getElementById('records');
-  let records = [];
+  function onScanSuccess(decodedText) {
+    // Fill scanned result, user can still edit
+    document.getElementById("chemicalId").value = decodedText;
+  }
 
-  // Start camera
-  codeReader.decodeFromVideoDevice(null, video, (result, err) => {
-    if (result) {
-      codeInput.value = result.text;
+  const html5QrCode = new Html5Qrcode("reader");
+
+  Html5Qrcode.getCameras().then(cameras => {
+    if (cameras && cameras.length) {
+      html5QrCode.start(
+        cameras[0].id,
+        { fps: 10, qrbox: 250 },
+        onScanSuccess
+      );
     }
   });
 
   function saveRecord() {
-    if (!codeInput.value || !drugName.value) {
-      alert("Please scan code and enter drug name.");
+    const id = document.getElementById("chemicalId").value;
+    const name = document.getElementById("chemicalName").value;
+    const loc = document.getElementById("location").value;
+
+    if (!id || !name || !loc) {
+      alert("Please fill in all fields.");
       return;
     }
 
-    const record = {
-      time: new Date().toLocaleString(),
-      code: codeInput.value,
-      name: drugName.value
-    };
+    const li = document.createElement("li");
+    li.textContent = `ID: ${id} | Name: ${name} | Location: ${loc}`;
 
-    records.push(record);
+    document.getElementById("recordList").appendChild(li);
 
-    const row = recordsTable.insertRow();
-    row.insertCell(0).innerText = record.time;
-    row.insertCell(1).innerText = record.code;
-    row.insertCell(2).innerText = record.name;
-
-    drugName.value = "";
-  }
-
-  function exportCSV() {
-    let csv = "Time,Code,Drug Name\n";
-    records.forEach(r => {
-      csv += `${r.time},${r.code},${r.name}\n`;
-    });
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "drug_records.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+    // Clear name & location, keep ID editable if needed
+    document.getElementById("chemicalName").value = "";
+    document.getElementById("location").value = "";
   }
 </script>
 
 </body>
 </html>
-
