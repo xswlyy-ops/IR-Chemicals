@@ -1,148 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>Lab Barcode Scanner</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <style>
-    body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
-  background: #f6f8fa;
-  padding: 10px;
-  max-width: 520px;
-  margin: auto;
-}
-
-/* 区块 */
-.section {
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-}
-
-/* 扫描窗口：手机优先 */
-#reader {
-  width: 100%;
-  height: 45vh;        /* 关键：占手机高度 */
-  min-height: 260px;
-  max-height: 420px;
-  border: 1px solid #ccc;
-  margin-bottom: 8px;
-}
-
-/* 文本 */
-h3 {
-  margin: 6px 0 10px;
-  font-size: 18px;
-}
-
-label {
-  font-weight: 600;
-  margin-top: 6px;
-  display: block;
-  font-size: 14px;
-}
-
-/* 输入框 */
-input {
-  width: 100%;
-  padding: 7px;
-  margin-top: 4px;
-  font-size: 14px;
-}
-
-/* 按钮：不夸张 */
-button {
-  width: 100%;
-  padding: 8px;
-  margin-top: 8px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-/* 按钮配色 */
-.primary { background: #2da44e; color: white; }
-.secondary { background: #0969da; color: white; }
-.danger { background: #cf222e; color: white; }
-
-/* 状态提示 */
-#status {
-  font-size: 13px;
-  margin-top: 4px;
-  color: #2da44e;
-}
-
-/* 表格 */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-th, td {
-  border: 1px solid #ccc;
-  padding: 5px;
-  text-align: center;
-}
-
-th {
-  background: #f0f2f4;
-}
-
-/* 桌面端微调 */
-@media (min-width: 768px) {
-  #reader {
-    height: 320px;
-  }
-
-  body {
-    max-width: 640px;
-  }
-}
-  </style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lab Barcode Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: system-ui, -apple-system; background: #f6f8fa; padding: 10px; max-width: 520px; margin: auto; }
+        .section { background: #fff; border-radius: 8px; padding: 10px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        #reader { width: 100%; min-height: 260px; background: #000; border-radius: 8px; overflow: hidden; }
+        h3 { margin: 15px 0 10px; font-size: 18px; }
+        label { font-weight: 600; margin-top: 10px; display: block; font-size: 14px; }
+        input { width: 100%; padding: 10px; margin-top: 4px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; margin-top: 10px; font-size: 14px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
+        .primary { background: #2da44e; color: white; }
+        .secondary { background: #0969da; color: white; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; background: white; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background: #f0f2f4; }
+    </style>
 </head>
 <body>
 
-<h3>📦 label Chemicals</h3>
+<h3>📦 Lab Inventory Scanner</h3>
 
 <div id="reader"></div>
-<button onclick="switchCamera()">🔁 切换摄像头</button>
+<button class="secondary" onclick="switchCamera()">🔁 切换摄像头</button>
 
-<label>Code</label>
-<input id="codeInput" placeholder="扫描条形码或手动输入">
+<label>条码编号 (Code)</label>
+<input id="codeInput" placeholder="扫描后自动填入">
 
-<label>Name</label>
-<input id="nameInput" placeholder="药品名称">
+<label>名称 (Name)</label>
+<input id="nameInput" placeholder="请输入药品或样本名称">
 
-<label>Location</label>
-<input id="locationInput" placeholder="如：冷藏柜B-1">
+<label>位置 (Location)</label>
+<input id="locationInput" placeholder="例如：Brdg-Shelf-A1">
 
-<button onclick="addRecord()">➕ 添加记录</button>
-<button onclick="exportCSV()">💾 导出 CSV</button>
+<button class="primary" onclick="addRecord()">➕ 添加记录</button>
+<button style="background:#6e7681; color:white;" onclick="exportCSV()">💾 导出 CSV</button>
 
-<h3>当前记录</h3>
-<table border="1" id="recordTable">
-  <thead>
-    <tr>
-      <th>label</th>
-      <th>name</th>
-      <th>location</th>
-      <th>time</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
+<h3>当前记录 (Today's Records)</h3>
+<table id="recordTable">
+    <thead>
+        <tr>
+            <th>条码</th>
+            <th>名称</th>
+            <th>位置</th>
+            <th>时间</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
 </table>
 
 <script>
-  const html5QrCode = new Html5Qrcode("reader");
-  let facingMode = "environment"; // 默认后置
+    // 变量定义
+    const codeInput = document.getElementById("codeInput");
+    const nameInput = document.getElementById("nameInput");
+    const locationInput = document.getElementById("locationInput");
+    const records = [];
+    const html5QrCode = new Html5Qrcode("reader");
+    let facingMode = "environment";
 
-  function startScanner() {
+    // 启动扫描仪
+    function startScanner() {
         const config = { 
             fps: 10, 
             qrbox: { width: 250, height: 150 }, // 针对条形码优化
@@ -161,75 +81,53 @@ th {
         ).catch(err => console.error("启动失败", err));
     }
 
-  function switchCamera() {
-    html5QrCode.stop().then(() => {
-      facingMode = facingMode === "environment" ? "user" : "environment";
-      startScanner();
-    });
-  }
-
-  startScanner();
-</script>
-<script>
-  const records = [];
-
-  function addRecord() {
-    const code = codeInput.value.trim();
-    const name = nameInput.value.trim();
-    const location = locationInput.value.trim();
-    const time = new Date().toLocaleString();
-
-    if (!code || !name || !location) {
-      alert("请填写完整信息");
-      return;
+    // 切换摄像头
+    function switchCamera() {
+        html5QrCode.stop().then(() => {
+            facingMode = facingMode === "environment" ? "user" : "environment";
+            startScanner();
+        }).catch(err => console.error(err));
     }
 
-    const record = { code, name, location, time };
-    records.push(record);
-    appendRow(record);
+    // 添加记录逻辑
+    function addRecord() {
+        const code = codeInput.value.trim();
+        const name = nameInput.value.trim();
+        const location = locationInput.value.trim();
+        const time = new Date().toLocaleTimeString();
 
-    // 清空输入（扫码下一个）
-    nameInput.value = "";
-    locationInput.value = "";
-  }
+        if (!code || !name) {
+            alert("请至少填写编号和名称");
+            return;
+        }
 
-  function appendRow(r) {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${r.code}</td>
-      <td>${r.name}</td>
-      <td>${r.location}</td>
-      <td>${r.time}</td>
-    `;
-    document.querySelector("#recordTable tbody").appendChild(row);
-  }
+        const record = { code, name, location, time };
+        records.push(record);
+        
+        const row = document.querySelector("#recordTable tbody").insertRow(0); // 新记录在最前
+        row.innerHTML = `<td>${code}</td><td>${name}</td><td>${location}</td><td>${time}</td>`;
 
-  function exportCSV() {
-    if (records.length === 0) {
-      alert("暂无记录");
-      return;
+        // 清空输入方便下次扫描
+        codeInput.value = "";
+        nameInput.value = "";
     }
 
-    let csv = "编号,药品名称,存放位置,记录时间\n";
-    records.forEach(r => {
-      csv += `"${r.code}","${r.name}","${r.location}","${r.time}"\n`;
-    });
+    // 导出 CSV
+    function exportCSV() {
+        if (records.length === 0) return alert("暂无数据");
+        let csv = "\uFEFF编号,名称,位置,时间\n"; // 添加BOM防止Excel中文乱码
+        records.forEach(r => {
+            csv += `"${r.code}","${r.name}","${r.location}","${r.time}"\n`;
+        });
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Lab_Scan_${new Date().getTime()}.csv`;
+        link.click();
+    }
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "lab_inventory.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+    // 初始化
+    startScanner();
 </script>
 </body>
 </html>
-
-
-
-
-
-
