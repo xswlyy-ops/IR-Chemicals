@@ -143,30 +143,23 @@ th {
   let facingMode = "environment"; // 默认后置
 
   function startScanner() {
-    html5QrCode.start(
-      { facingMode: facingMode },
-      {
-        fps: 10,
-        qrbox: (viewfinderWidth, viewfinderHeight) => {
-  return {
-    width: viewfinderWidth * 0.9,
-    height: viewfinderHeight * 0.5
-  };
-} };
-}, // 条形码用“横框”
-        formatsToSupport: [
-          Html5QrcodeSupportedFormats.CODE_128,
-          Html5QrcodeSupportedFormats.EAN_13,
-          Html5QrcodeSupportedFormats.EAN_8,
-          Html5QrcodeSupportedFormats.UPC_A,
-          Html5QrcodeSupportedFormats.UPC_E
-        ]
-      },
-      (decodedText) => {
-        document.getElementById("codeInput").value = decodedText;
-      }
-    );
-  }
+        const config = { 
+            fps: 10, 
+            qrbox: { width: 250, height: 150 }, // 针对条形码优化
+            aspectRatio: 1.0
+        };
+
+        html5QrCode.start(
+            { facingMode: facingMode }, 
+            config,
+            (decodedText) => {
+                codeInput.value = decodedText;
+                // 扫描成功后震动反馈 (部分手机支持)
+                if (navigator.vibrate) navigator.vibrate(100);
+            },
+            (errorMessage) => { /* 忽略扫描中的报错 */ }
+        ).catch(err => console.error("启动失败", err));
+    }
 
   function switchCamera() {
     html5QrCode.stop().then(() => {
@@ -234,6 +227,7 @@ th {
 </script>
 </body>
 </html>
+
 
 
 
