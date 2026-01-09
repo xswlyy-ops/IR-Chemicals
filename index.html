@@ -2,96 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Lab Chemical Scan</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- HTML5 QR code library -->
+  <title>Lab Barcode Scanner</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 15px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input, button {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      font-size: 16px;
-    }
-    #records {
-      margin-top: 20px;
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
-    }
+    body { font-family: Arial; padding: 15px; }
+    #reader { width: 320px; margin-bottom: 10px; }
+    input, button { width: 100%; padding: 8px; margin: 6px 0; }
   </style>
 </head>
-
 <body>
 
-<h2>Laboratory Chemical Registration</h2>
+<h3>📦 实验室条形码录入</h3>
 
-<!-- Camera scan area -->
-<div id="reader" style="width:100%;"></div>
+<div id="reader"></div>
+<button onclick="switchCamera()">🔁 切换摄像头</button>
 
-<label>Scanned / Editable ID Number</label>
-<input type="text" id="chemicalId" placeholder="Scan or edit manually">
+<label>编号（可修改）</label>
+<input id="codeInput" placeholder="扫描条形码或手动输入">
 
-<label>Chemical Name</label>
-<input type="text" id="chemicalName" placeholder="e.g. LiTFSI">
+<label>药品名称</label>
+<input id="nameInput" placeholder="药品名称">
 
-<label>Storage Location</label>
-<input type="text" id="location" placeholder="e.g. Cabinet A3 / Fridge 2">
-
-<button onclick="saveRecord()">Save Record</button>
-
-<div id="records">
-  <h3>Saved Records</h3>
-  <ul id="recordList"></ul>
-</div>
+<label>存放位置</label>
+<input id="locationInput" placeholder="如：冷藏柜B-1">
 
 <script>
-  function onScanSuccess(decodedText) {
-    // Fill scanned result, user can still edit
-    document.getElementById("chemicalId").value = decodedText;
-  }
-
   const html5QrCode = new Html5Qrcode("reader");
+  let facingMode = "environment"; // 默认后置
 
-  Html5Qrcode.getCameras().then(cameras => {
-    if (cameras && cameras.length) {
-      html5QrCode.start(
-        cameras[0].id,
-        { fps: 10, qrbox: 250 },
-        onScanSuccess
-      );
-    }
-  });
-
-  function saveRecord() {
-    const id = document.getElementById("chemicalId").value;
-    const name = document.getElementById("chemicalName").value;
-    const loc = document.getElementById("location").value;
-
-    if (!id || !name || !loc) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
-    const li = document.createElement("li");
-    li.textContent = `ID: ${id} | Name: ${name} | Location: ${loc}`;
-
-    document.getElementById("recordList").appendChild(li);
-
-    // Clear name & location, keep ID editable if needed
-    document.getElementById("chemicalName").value = "";
-    document.getElementById("location").value = "";
+  function startScanner() {
+    html5QrCode.start(
+      { facingMode: facingMode },
+      {
+        fps: 10,
+        qrbox: { width: 300, height: 120 }, // 条形码用“横框”
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E
+        ]
+      },
+      (decodedText) => {
+        document.getElementById("codeInput").value = decodedText;
+      }
+    );
   }
+
+  function switchCamera() {
+    html5QrCode.stop().then(() => {
+      facingMode = facingMode === "environment" ? "user" : "environment";
+      startScanner();
+    });
+  }
+
+  startScanner();
 </script>
 
 </body>
