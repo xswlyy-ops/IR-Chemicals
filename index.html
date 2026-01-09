@@ -17,14 +17,30 @@
 <div id="reader"></div>
 <button onclick="switchCamera()">🔁 切换摄像头</button>
 
-<label>编号（可修改）</label>
+<label>code（可修改）</label>
 <input id="codeInput" placeholder="扫描条形码或手动输入">
 
-<label>药品名称</label>
+<label>Name</label>
 <input id="nameInput" placeholder="药品名称">
 
-<label>存放位置</label>
+<label>location</label>
 <input id="locationInput" placeholder="如：冷藏柜B-1">
+
+<button onclick="addRecord()">➕ 添加记录</button>
+<button onclick="exportCSV()">💾 导出 CSV</button>
+
+<h3>当前记录</h3>
+<table border="1" id="recordTable">
+  <thead>
+    <tr>
+      <th>label</th>
+      <th>name</th>
+      <th>location</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
 <script>
   const html5QrCode = new Html5Qrcode("reader");
@@ -59,6 +75,61 @@
 
   startScanner();
 </script>
+<script>
+  const records = [];
 
+  function addRecord() {
+    const code = codeInput.value.trim();
+    const name = nameInput.value.trim();
+    const location = locationInput.value.trim();
+    const time = new Date().toLocaleString();
+
+    if (!code || !name || !location) {
+      alert("请填写完整信息");
+      return;
+    }
+
+    const record = { code, name, location, time };
+    records.push(record);
+    appendRow(record);
+
+    // 清空输入（扫码下一个）
+    nameInput.value = "";
+    locationInput.value = "";
+  }
+
+  function appendRow(r) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${r.code}</td>
+      <td>${r.name}</td>
+      <td>${r.location}</td>
+      <td>${r.time}</td>
+    `;
+    document.querySelector("#recordTable tbody").appendChild(row);
+  }
+
+  function exportCSV() {
+    if (records.length === 0) {
+      alert("暂无记录");
+      return;
+    }
+
+    let csv = "编号,药品名称,存放位置,记录时间\n";
+    records.forEach(r => {
+      csv += `"${r.code}","${r.name}","${r.location}","${r.time}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "lab_inventory.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
 </body>
 </html>
+
