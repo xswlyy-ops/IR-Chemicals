@@ -147,8 +147,12 @@ th {
       { facingMode: facingMode },
       {
         fps: 10,
-        qrbox: (viewfinderWidth, viewfinderHeight)
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+  return {
+    width: viewfinderWidth * 0.9,
+    height: viewfinderHeight * 0.5
   };
+} };
 }, // 条形码用“横框”
         formatsToSupport: [
           Html5QrcodeSupportedFormats.CODE_128,
@@ -230,6 +234,7 @@ th {
 </script>
 </body>
 </html>
+
 
 
 
