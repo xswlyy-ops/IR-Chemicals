@@ -5,25 +5,36 @@
   <title>Lab Barcode Scanner</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    body { font-family: Arial; padding: 15px; }
-    #reader { width: 320px; margin-bottom: 10px; }
-    input, button { width: 100%; padding: 8px; margin: 6px 0; }
+    body { font-family: Arial; sans-serif; padding: 15px; }
+    #reader { width: 100%; border: 1px solid #ccc; margin-bottom: 10px; }
+    input, button { width: 100%; padding: 8px; margin-top: 6px 0; font-size: 16px; }
+  table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
   </style>
+
 </head>
 <body>
 
-<h3>📦 实验室条形码录入</h3>
+<h3>📦 label Chemicals</h3>
 
 <div id="reader"></div>
 <button onclick="switchCamera()">🔁 切换摄像头</button>
 
-<label>code（可修改）</label>
+<label>Code</label>
 <input id="codeInput" placeholder="扫描条形码或手动输入">
 
 <label>Name</label>
 <input id="nameInput" placeholder="药品名称">
 
-<label>location</label>
+<label>Location</label>
 <input id="locationInput" placeholder="如：冷藏柜B-1">
 
 <button onclick="addRecord()">➕ 添加记录</button>
@@ -132,4 +143,5 @@
 </script>
 </body>
 </html>
+
 
