@@ -161,7 +161,7 @@ th {
       { facingMode },
       {
         fps: 10,
-        qrbox: { width: 800, height: 200 },
+        qrbox: { width: 1000, height: 200 },
         formatsToSupport: [
           Html5QrcodeSupportedFormats.CODE_128,
           Html5QrcodeSupportedFormats.EAN_13,
@@ -171,8 +171,8 @@ th {
         ]
       },
       (decodedText) => {
+        if (navigator.vibrate) navigator.vibrate(100);
         if (locked) return;
-
         locked = true;
         document.getElementById("codeInput").value = decodedText;
         document.getElementById("status").innerText = "✔ Barcode captured";
@@ -246,3 +246,4 @@ th {
 
 </body>
 </html>
+
